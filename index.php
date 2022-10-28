@@ -2,6 +2,7 @@
 
 require "vendor/autoload.php";
 use App\Lib\TweetController;
+use App\Lib\Twitter;
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -10,6 +11,7 @@ $servername = $_ENV["DB_HOST"];
 $username = $_ENV["DB_USER"];
 $password = $_ENV["DB_PASS"];
 $dbName = $_ENV["DB_NAME"];
+$conn = false;
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbName;charset=utf8mb4", $username, $password);
@@ -31,62 +33,10 @@ $settings = [
     'access_token_secret' => $_ENV['ACCESS_TOKEN_SECRET']
 ];
 
+$client = new TweetController($settings);
+$twitter = new Twitter($client, $conn);
 
-/**
- * Loop through all liked Tweets and store id, text to db
- * @return void
- * @throws JsonException
- * @throws \GuzzleHttp\Exception\GuzzleException
- */
-function storeLikedTweets()
-{
-    global $conn, $settings;
-
-    $client = new TweetController($settings);
-    $client->setEndpoint('users/222041939/liked_tweets');
-    $result = $client->performRequest();
-
-    $nexttoken = $result->meta->next_token;
-
-    while ($nexttoken != null) {
-        $client->setNextToken($nexttoken);
-        $result = $client->performRequest();
-        $nexttoken = $result->meta->next_token;
-
-        foreach ($result->data as $row) {
-
-            $statement = $conn->prepare('INSERT INTO liked VALUES (:id, :content)');
-
-            $statement->execute([
-                'id' => $row->id,
-                'content' => $row->text,
-            ]);
-        }
-    }
-}
-
-/**
- * Fetch attachment, author, etc
- * @param int $id
- * @return void
- */
-function storeTweet(int $id)
-{
-    global $conn, $settings;
-    $client = new \Noweh\TwitterApi\Client($settings);
-    $result = $client->tweet()->performRequest('GET', array( 'id' => $id));
-
-    //$statement = $conn->prepare('INSERT INTO tweet VALUES (:id, :content) ON DUPLICATE KEY UPDATE content = :content');
-    //
-    //$encoding = mb_detect_encoding($result->data->text);
-    //$content = $result->data->text;
-    //$statement->execute([
-    //    'id' => $result->data->id,
-    //    'content' => $content,
-    //]);
-
-
-
-}
+//$twitter->storeLikedTweets();
+$twitter->enrichTweets();
 
 
