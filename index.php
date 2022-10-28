@@ -1,9 +1,5 @@
 <?php
-
 require "vendor/autoload.php";
-use App\Lib\TweetController;
-use App\Lib\Twitter;
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -19,24 +15,87 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $conn->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, "SET NAMES utf8mb4 COLLATE utf8mb4_general_ci");
 
-    echo "Connected successfully";
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
 }
 
-$settings = [
-    'account_id' => $_ENV['ACCOUNT_ID'],
-    'consumer_key' => $_ENV['CONSUMER_KEY'],
-    'consumer_secret' => $_ENV['CONSUMER_SECRET'],
-    'bearer_token' => $_ENV['BEARER_TOKEN'],
-    'access_token' => $_ENV['ACCESS_TOKEN'],
-    'access_token_secret' => $_ENV['ACCESS_TOKEN_SECRET']
-];
+?>
 
-$client = new TweetController($settings);
-$twitter = new Twitter($client, $conn);
+<html>
+<head>
+<!--    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>-->
 
-$twitter->storeLikedTweets();
-$twitter->enrichTweets();
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        #flex-container {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        #flex-container > .flex-item {
+            flex: auto;
+            max-width: 400px;
+            border:1px solid #067acc;
+            padding: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="flex-container" class="grid">
+<?php
+$stmt = $conn->prepare("SELECT liked.*, tu.name, tu.username FROM liked LEFT JOIN twitter_users tu ON tu.id = user_id WHERE `updated` IS NOT NULL ");
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
+
+foreach ($rows as $row) {
+    $pattern = "images/".$row['id'] ."*";
+
+    echo "<div class='flex-item grid-item'>";
+
+    echo '<strong><a href="https://twitter.com/'.$row["username"].'/status/'.$row['id'].'" target="_blank">'.$row['name'].'</a></strong><br/>';
+    echo $row['content'].'<br/>';
+
+    $files = glob($pattern);
+    foreach ($files as $file) {
+        if (str_ends_with($file,'jpg') || str_ends_with($file,'png') || str_ends_with($file,'gif')) {
+            print '<img width=200 src="'.$file.'">';
+        }
+        if (str_ends_with($file,'mp4')) {
+            print <<<DOC
+            <video width="320" height="240" controls>
+            <source src="$file" type="video/mp4">
+            </video>
+DOC;
+        }
+    }
+    
+    echo "</div>";
+}
+
+?>
+
+</div>
+<script>
+
+    // var grid = document.querySelector('.grid');
+    // var msnry = new Masonry( grid, {
+    //     // options...
+    //     itemSelector: '.grid-item',
+    //     columnWidth: 200
+    // });
+</script>
+</body>
+
+
+</html>

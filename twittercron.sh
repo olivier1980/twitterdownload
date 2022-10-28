@@ -1,1 +1,1 @@
-php /var/www/index.php
+php /var/www/download.php

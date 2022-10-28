@@ -6,7 +6,7 @@ I used this to store the ~5000 tweets I liked over the years, with all attached 
 
 Exported SQL structure is available in `twitter.sql`, just create a MySQL/MariaDB database and import.
 
-Run `php index.php` from a command prompt. This will do 2 actions:
+Run `php download.php` from a command prompt. This will do 2 actions:
 - $twitter->storeLikedTweets();
 - $twitter->enrichTweets();
 
