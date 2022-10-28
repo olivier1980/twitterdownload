@@ -119,7 +119,18 @@ class Twitter
                     $url = $img->variants[0]->url;
                     $ext = 'mp4';
                 } elseif ($img->type == 'video') {
-                    $url = $img->variants[0]->url;
+                    $found = false;
+                    $bitrate = 0;
+                    foreach ($img->variants as $variant) {
+                        if (!isset($variant->bit_rate)) {
+                            continue;
+                        }
+                        if ($variant->bit_rate > $bitrate) {
+                            $bitrate = $variant->bit_rate;
+                            $found = $variant->url;
+                        }
+                    }
+                    $url = $found;
                     $ext = 'mp4';
                 } else {
                     $url = $img->url;
