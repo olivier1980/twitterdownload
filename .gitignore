@@ -2,3 +2,6 @@ vendor
 .idea
 localcomposer
 .env
+images/*.jpg
+images/*.png
+images/*.mp4

@@ -17,6 +17,19 @@ class Twitter
     }
 
 
+    function storeToDb($result)
+    {
+        foreach ($result->data as $row) {
+
+            $statement = $this->conn->prepare('INSERT INTO liked SET id = :id, content = :content)');
+
+            $statement->execute([
+                'id' => $row->id,
+                'content' => $row->text,
+            ]);
+        }
+    }
+
     /**
      * Loop through all liked Tweets and store id, text to db
      * @return void
@@ -27,23 +40,14 @@ class Twitter
     {
         $this->client->setEndpoint('users/222041939/liked_tweets');
         $result = $this->client->performRequest();
-
+        $this->storeToDb($result);
         $nexttoken = $result->meta->next_token;
 
         while ($nexttoken != null) {
             $this->client->setNextToken($nexttoken);
             $result = $this->client->performRequest();
             $nexttoken = $result->meta->next_token;
-
-            foreach ($result->data as $row) {
-
-                $statement = $this->conn->prepare('INSERT INTO liked VALUES (:id, :content)');
-
-                $statement->execute([
-                    'id' => $row->id,
-                    'content' => $row->text,
-                ]);
-            }
+            $this->storeToDb($result);
         }
     }
 
