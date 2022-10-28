@@ -119,8 +119,8 @@ class Twitter
                     $url = $img->variants[0]->url;
                     $ext = 'mp4';
                 } elseif ($img->type == 'video') {
-                    $t=1;
-
+                    $url = $img->variants[0]->url;
+                    $ext = 'mp4';
                 } else {
                     $url = $img->url;
                     $ext = pathinfo($img->url, PATHINFO_EXTENSION);
