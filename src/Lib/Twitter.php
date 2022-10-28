@@ -49,9 +49,10 @@ class Twitter
 
     public function enrichTweets()
     {
-        $stmt = $this->conn->prepare("SELECT id FROM liked");
+        $stmt = $this->conn->prepare("SELECT id FROM liked WHERE `updated` IS NULL");
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        print('Found '. $stmt->rowCount() . ' rows.'.PHP_EOL);
         foreach ($rows as $row) {
             $this->storeTweet($row['id']);
         }

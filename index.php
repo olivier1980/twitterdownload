@@ -36,7 +36,7 @@ $settings = [
 $client = new TweetController($settings);
 $twitter = new Twitter($client, $conn);
 
-//$twitter->storeLikedTweets();
+$twitter->storeLikedTweets();
 $twitter->enrichTweets();
 
 
