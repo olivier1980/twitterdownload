@@ -1,0 +1,12 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+    "require": {
+        "noweh/twitter-api-v2-php": "dev-master",
+        "ext-pdo": "*",
+        "vlucas/phpdotenv": "^5.5"
+    }
+}
